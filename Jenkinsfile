@@ -51,6 +51,20 @@ pipeline {
             }
         }
 
+        stage('Trivy Image Scan') {
+    steps {
+        sh '''
+        echo "Running Trivy image scan"
+        trivy image $IMAGE_NAME \
+          --severity HIGH,CRITICAL \
+          --timeout 10m \
+          --format json \
+          --output trivy-image-report.json || true
+        '''
+    }
+}
+
+
         stage('Docker Run (Test)') {
             steps {
                 sh '''
