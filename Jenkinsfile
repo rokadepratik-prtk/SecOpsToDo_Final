@@ -17,21 +17,35 @@ pipeline {
             }
         }
 
-        stage('Install Dependencies') {
+        stage('Install Backend Dependencies') {
             steps {
-                sh 'npm install'
+                dir('backend') {
+                    sh 'npm install'
+                }
             }
         }
 
-        stage('Build') {
+        stage('Install Frontend Dependencies') {
             steps {
-                sh 'npm run build'
+                dir('frontend') {
+                    sh 'npm install'
+                }
+            }
+        }
+
+        stage('Build Frontend') {
+            steps {
+                dir('frontend') {
+                    sh 'npm run build'
+                }
             }
         }
 
         stage('Unit Tests') {
             steps {
-                sh 'npm test'
+                dir('backend') {
+                    sh 'npm test'
+                }
             }
         }
 
@@ -85,3 +99,4 @@ pipeline {
         }
     }
 }
+
