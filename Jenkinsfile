@@ -52,18 +52,17 @@ pipeline {
         }
 
         stage('Trivy Image Scan') {
-    steps {
-        sh '''
-        echo "Running Trivy image scan"
-        trivy image $IMAGE_NAME \
-          --severity HIGH,CRITICAL \
-          --timeout 10m \
-          --format json \
-          --output trivy-image-report.json || true
-        '''
-    }
-}
-
+            steps {
+                sh '''
+                echo "Running Trivy image scan"
+                trivy image $IMAGE_NAME \
+                  --severity HIGH,CRITICAL \
+                  --timeout 10m \
+                  --format json \
+                  --output trivy-image-report.json || true
+                '''
+            }
+        }
 
         stage('Docker Run (Test)') {
             steps {
@@ -76,26 +75,17 @@ pipeline {
             }
         }
 
-        stage('Deploy to App Server (192.168.56.115)') {
-            environment {
-                APP_HOST = "192.168.56.115"
-                APP_USER = "star"
-            }
+        stage('Deploy Locally') {
             steps {
                 sh '''
-                echo "Stopping old container on app server"
-                ssh ${APP_USER}@${APP_HOST} "docker rm -f glass-todo || true"
+                echo "Stopping old container"
+                docker rm -f glass-todo || true
 
-                echo "Transferring image to app server"
-                docker save glass-todo | ssh ${APP_USER}@${APP_HOST} docker load
-
-                echo "Running new container on app server"
-                ssh ${APP_USER}@${APP_HOST} "
-                  docker run -d \
-                    --name glass-todo \
-                    -p 5000:5000 \
-                    glass-todo
-                "
+                echo "Running new container"
+                docker run -d \
+                  --name glass-todo \
+                  -p 5000:5000 \
+                  $IMAGE_NAME
                 '''
             }
         }
@@ -111,7 +101,7 @@ pipeline {
                   -v $(pwd):/zap/wrk \
                   zaproxy/zap-stable \
                   zap-baseline.py \
-                  -t http://192.168.56.115:5000 \
+                  -t http://localhost:5000 \
                   -r zap-report.html || true
                 '''
             }
