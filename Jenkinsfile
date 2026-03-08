@@ -71,7 +71,7 @@ pipeline {
         stage('Deploy') {
             steps {
                 echo "Deploying container..."
-                sh "docker run -d -p 3000:3000 $DOCKER_REGISTRY"
+                sh "docker run -d -p 5000:5000 $DOCKER_REGISTRY"
             }
         }
     }
