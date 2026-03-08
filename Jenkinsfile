@@ -85,8 +85,8 @@ pipeline {
 
         stage('Deploy') {
             steps {
-                echo "Deploying container..."
-                sh "docker run -d -p 5000:5000 $DOCKER_REGISTRY"
+                echo "Deploying with Docker Compose..."
+                sh "docker-compose -f docker-compose.yml up -d --build"
             }
         }
     }
