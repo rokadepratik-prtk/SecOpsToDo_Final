@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     triggers {
-        // Poll SCM disabled; webhook will trigger builds..
+        // Poll SCM disabled; webhook will trigger builds
         githubPush()
     }
 
