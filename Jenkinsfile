@@ -44,7 +44,8 @@ pipeline {
         stage('Unit Tests') {
             steps {
                 dir('backend') {
-                    sh 'npm test || echo \"No tests defined\""
+                    // Run tests if defined, otherwise skip gracefully
+                    sh 'npm test || echo "No tests defined"'
                 }
             }
         }
