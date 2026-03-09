@@ -17,20 +17,21 @@ pipeline {
             }
         }
 
-        stage('SonarQube Analysis') {
-            steps {
-                withSonarQubeEnv('SonarQubeServer') {
-                    script {
-                        def scannerHome = tool 'SonarQubeScanner'
-                        sh "${scannerHome}/bin/sonar-scanner \
-                           -Dsonar.projectKey=SecOpsToDo_Final \
-                           -Dsonar.sources=frontend/src,backend \
-                           -Dsonar.exclusions=**/node_modules/**,**/build/**,**/dist/**,**/*.css,**/*.map \
-                           -Dsonar.sourceEncoding=UTF-8"
-                    }
-                }
+   stage('SonarQube Analysis') {
+    steps {
+        withSonarQubeEnv('SonarQubeScanner') {   // must match Jenkins config
+            script {
+                def scannerHome = tool 'SonarQubeScanner' // must match Global Tool Configuration
+                sh "${scannerHome}/bin/sonar-scanner \
+                   -Dsonar.projectKey=SecOpsToDo_Final \
+                   -Dsonar.sources=frontend/src,backend \
+                   -Dsonar.exclusions=**/node_modules/**,**/build/**,**/dist/**,**/*.css,**/*.map \
+                   -Dsonar.sourceEncoding=UTF-8"
             }
         }
+    }
+}
+
 
         stage('Docker Build') {
             steps {
