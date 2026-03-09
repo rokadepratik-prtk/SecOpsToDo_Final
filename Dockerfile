@@ -12,16 +12,13 @@ WORKDIR /app/backend
 COPY backend/package*.json ./
 RUN npm install
 COPY backend/ .
+RUN npm run build
 
-# Stage 3: Production image
-FROM node:18-alpine
+# Stage 3: Final runtime image
+FROM node:18-slim
 WORKDIR /app
-
-# Copy backend
-COPY --from=backend-build /app/backend ./
-
-# Copy frontend build output into backend's public folder (or wherever you serve static files)
 COPY --from=frontend-build /app/frontend/build ./frontend/build
-
-EXPOSE 3000
-CMD ["npm", "start", "--prefix", "backend"]
+COPY --from=backend-build /app/backend/dist ./backend/dist
+COPY backend/package*.json ./backend/
+RUN npm install --production --prefix backend
+CMD ["node", "backend/dist/index.js"]
