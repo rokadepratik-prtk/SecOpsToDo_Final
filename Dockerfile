@@ -1,20 +1,27 @@
 # Stage 1: Build frontend
-FROM node:20-alpine AS frontend-build
+FROM node:18 AS frontend-build
 WORKDIR /app/frontend
 COPY frontend/package*.json ./
 RUN npm install
-COPY frontend ./
+COPY frontend/ .
 RUN npm run build
 
-# Stage 2: Backend
-FROM node:20-alpine AS backend
+# Stage 2: Build backend
+FROM node:18 AS backend-build
 WORKDIR /app/backend
 COPY backend/package*.json ./
-RUN npm install --only=production
-COPY backend ./
+RUN npm install
+COPY backend/ .
 
-# Copy frontend build into backend (if backend serves static files)
-COPY --from=frontend-build /app/frontend/build ./public
+# Stage 3: Production image
+FROM node:18-alpine
+WORKDIR /app
 
-EXPOSE 5000
-CMD ["node", "server.js"]
+# Copy backend
+COPY --from=backend-build /app/backend ./
+
+# Copy frontend build output into backend's public folder (or wherever you serve static files)
+COPY --from=frontend-build /app/frontend/build ./frontend/build
+
+EXPOSE 3000
+CMD ["npm", "start", "--prefix", "backend"]
