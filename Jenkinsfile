@@ -44,19 +44,22 @@ pipeline {
         stage('Unit Tests') {
             steps {
                 dir('backend') {
-                    // Run tests if defined, otherwise skip gracefully
                     sh 'npm test || echo "No tests defined"'
                 }
             }
         }
 
         stage('SonarQube Analysis') {
-            environment {
-                SONARQUBE_SCANNER_HOME = tool 'SonarQubeScanner'
-            }
             steps {
                 withSonarQubeEnv('MySonarQubeServer') {
-                    sh "${SONARQUBE_SCANNER_HOME}/bin/sonar-scanner -Dsonar.projectKey=SecOpsToDo_Final"
+                    script {
+                        def scannerHome = tool 'SonarQubeScanner'
+                        sh "${scannerHome}/bin/sonar-scanner \
+                           -Dsonar.projectKey=SecOpsToDo_Final \
+                           -Dsonar.sources=frontend/src,backend \
+                           -Dsonar.exclusions=**/node_modules/**,**/build/**,**/dist/**,**/*.css,**/*.map \
+                           -Dsonar.sourceEncoding=UTF-8"
+                    }
                 }
             }
         }
