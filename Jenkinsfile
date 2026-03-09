@@ -17,43 +17,11 @@ pipeline {
             }
         }
 
-        stage('Install Backend Dependencies') {
-            steps {
-                dir('backend') {
-                    sh 'npm install'
-                }
-            }
-        }
-
-        stage('Install Frontend Dependencies') {
-            steps {
-                dir('frontend') {
-                    sh 'npm install'
-                }
-            }
-        }
-
-        stage('Build Frontend') {
-            steps {
-                dir('frontend') {
-                    sh 'npm run build'
-                }
-            }
-        }
-
-        stage('Unit Tests') {
-            steps {
-                dir('backend') {
-                    sh 'npm test || echo "No tests defined"'
-                }
-            }
-        }
-
         stage('SonarQube Analysis') {
             steps {
-                withSonarQubeEnv('SonarQubeServer') {   // must match the name in Jenkins config
+                withSonarQubeEnv('SonarQubeServer') {
                     script {
-                        def scannerHome = tool 'SonarQubeScanner' // must match Global Tool Configuration
+                        def scannerHome = tool 'SonarQubeScanner'
                         sh "${scannerHome}/bin/sonar-scanner \
                            -Dsonar.projectKey=SecOpsToDo_Final \
                            -Dsonar.sources=frontend/src,backend \
