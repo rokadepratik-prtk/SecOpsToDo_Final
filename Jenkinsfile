@@ -21,15 +21,16 @@ pipeline {
             }
         }
 
-       stage('Security Scan') {
+stage('Security Scan') {
     steps {
         sh '''
         echo "Running Trivy scan..."
-        trivy image --severity HIGH,CRITICAL --format table -o trivy-report.txt secopstodo:latest
+        trivy image --severity HIGH,CRITICAL --format table secopstodo:latest > trivy-report.txt
         '''
         archiveArtifacts artifacts: 'trivy-report.txt', fingerprint: true
     }
 }
+
 
     }
 }
