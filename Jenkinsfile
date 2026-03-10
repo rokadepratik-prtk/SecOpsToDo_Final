@@ -31,9 +31,7 @@ stage('Security Scan') {
 }
 stage('Convert Trivy Report') {
     steps {
-        sh '''
-        node trivy-json-to-html.js trivy-report.json trivy-report.html
-        '''
+        sh 'node trivy-json-to-html.js trivy-report.json trivy-report.html'
         publishHTML(target: [
             reportDir: '.',
             reportFiles: 'trivy-report.html',
@@ -41,6 +39,7 @@ stage('Convert Trivy Report') {
         ])
     }
 }
+
 
 
 
