@@ -29,6 +29,19 @@ stage('Security Scan') {
         archiveArtifacts artifacts: 'trivy-report.json', fingerprint: true
     }
 }
+stage('Convert Trivy Report') {
+    steps {
+        sh '''
+        node trivy-json-to-html.js trivy-report.json trivy-report.html
+        '''
+        publishHTML(target: [
+            reportDir: '.',
+            reportFiles: 'trivy-report.html',
+            reportName: 'Trivy Security Report'
+        ])
+    }
+}
+
 
 
     }
