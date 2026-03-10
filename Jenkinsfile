@@ -20,28 +20,26 @@ pipeline {
                 sh "docker build -t secopstodo:latest ."
             }
         }
-stage('Security Scan') {
-    steps {
-        sh '''
-        echo "Running Trivy scan..."
-        trivy image --severity HIGH,CRITICAL --format json -o trivy-report.json secopstodo:latest
-        '''
-        archiveArtifacts artifacts: 'trivy-report.json', fingerprint: true
-    }
-}
-stage('Convert Trivy Report') {
-    steps {
-        sh 'node trivy-json-to-html.js trivy-report.json trivy-report.html'
-        publishHTML(target: [
-            reportDir: '.',
-            reportFiles: 'trivy-report.html',
-            reportName: 'Trivy Security Report'
-        ])
-    }
-}
 
+        stage('Security Scan') {
+            steps {
+                sh '''
+                echo "Running Trivy scan..."
+                trivy image --severity HIGH,CRITICAL --format json -o trivy-report.json secopstodo:latest
+                '''
+                archiveArtifacts artifacts: 'trivy-report.json', fingerprint: true
+            }
+        }
 
-
-
+        stage('Convert Trivy Report') {
+            steps {
+                sh 'node trivy-json-to-html.js trivy-report.json trivy-report.html'
+                publishHTML(target: [
+                    reportDir: '.',
+                    reportFiles: 'trivy-report.html',
+                    reportName: 'Trivy Security Report'
+                ])
+            }
+        }
     }
 }
