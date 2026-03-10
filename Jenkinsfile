@@ -20,15 +20,16 @@ pipeline {
                 sh "docker build -t secopstodo:latest ."
             }
         }
+stage('Security Scan') {
+    steps {
+        sh '''
+        echo "Running Trivy scan..."
+        trivy image --severity HIGH,CRITICAL --format json -o trivy-report.json secopstodo:latest
+        '''
+        archiveArtifacts artifacts: 'trivy-report.json', fingerprint: true
+    }
+}
 
-        stage('Security Scan') {
-            steps {
-                sh '''
-                echo "Running Trivy scan..."
-                trivy image --severity HIGH,CRITICAL --format table secopstodo:latest > trivy-report.txt
-                '''
-                archiveArtifacts artifacts: 'trivy-report.txt', fingerprint: true
-            }
-        }
+
     }
 }
