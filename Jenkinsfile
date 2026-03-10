@@ -17,15 +17,19 @@ pipeline {
             }
         }
 
-        stage('Convert Trivy Report') {
-            steps {
-                sh 'node trivy-json-to-html.js trivy-report.json trivy-report.html'
-                publishHTML([
-                    reportDir: '.',
-                    reportFiles: 'trivy-report.html',
-                    reportName: 'Trivy Security Report'
-                ])
+            stage('Convert Trivy Report') {
+                steps {
+                    sh 'node trivy-json-to-html.js trivy-report.json trivy-report.html'
+                    publishHTML([
+                        reportDir: '.',
+                        reportFiles: 'trivy-report.html',
+                        reportName: 'Trivy Security Report',
+                        keepAll: true,
+                        alwaysLinkToLastBuild: true,
+                        allowMissing: false
+                    ])
+                }
             }
-        }
+
     }
 }
