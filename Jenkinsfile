@@ -21,20 +21,14 @@ pipeline {
             }
         }
 
-stage('Security Scan') {
-    steps {
-        sh '''
-        echo "Running Trivy scan..."
-        # Run Trivy with table format and redirect output to a file
-        trivy image --severity HIGH,CRITICAL --format table secopstodo:latest > trivy-report.txt
-        '''
-        # Archive the report so you can download it from Jenkins
-        archiveArtifacts artifacts: 'trivy-report.txt', fingerprint: true
-    }
-}
-
-
-
-
+        stage('Security Scan') {
+            steps {
+                sh '''
+                echo "Running Trivy scan..."
+                trivy image --severity HIGH,CRITICAL --format table secopstodo:latest > trivy-report.txt
+                '''
+                archiveArtifacts artifacts: 'trivy-report.txt', fingerprint: true
+            }
+        }
     }
 }
