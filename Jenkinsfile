@@ -21,14 +21,14 @@ pipeline {
             }
         }
 
-stage('Security Scan') {
-    steps {
-        sh '''
-        echo "Running Trivy scan..."
-        trivy image --severity HIGH,CRITICAL --format html -o trivy-report.html secopstodo:latest
-        '''
-        archiveArtifacts artifacts: 'trivy-report.html', fingerprint: true
+        stage('Security Scan') {
+            steps {
+                sh '''
+                echo "Running Trivy scan..."
+                trivy image --severity HIGH,CRITICAL --format html -o trivy-report.html secopstodo:latest
+                '''
+                archiveArtifacts artifacts: 'trivy-report.html', fingerprint: true
+            }
+        }
     }
-}
-
 }
