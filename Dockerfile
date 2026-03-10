@@ -20,7 +20,7 @@ WORKDIR /app
 # Copy frontend production build
 COPY --from=frontend-build /app/frontend/build ./frontend/build
 
-# Copy backend source directly (no dist folder)
+# Copy backend source directly
 COPY --from=backend-build /app/backend ./backend
 
 # Install only production dependencies for backend
