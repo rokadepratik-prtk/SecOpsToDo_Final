@@ -20,5 +20,15 @@ pipeline {
                 sh "docker build -t secopstodo:latest ."
             }
         }
+
+        stage('Security Scan') {
+            steps {
+                sh '''
+                echo "Running Trivy scan..."
+                trivy image --exit-code 1 --severity HIGH,CRITICAL secopstodo:latest
+                echo "Trivy scan completed"
+                '''
+            }
+        }
     }
 }
