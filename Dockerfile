@@ -6,7 +6,7 @@ RUN npm install
 COPY frontend/ .
 RUN npm run build
 
-# Stage 2: Backend (plain Node.js, no build step)
+# Stage 2: Backend build
 FROM node:18 AS backend-build
 WORKDIR /app/backend
 COPY backend/package*.json ./
@@ -20,11 +20,11 @@ WORKDIR /app
 # Copy frontend production build
 COPY --from=frontend-build /app/frontend/build ./frontend/build
 
-# Copy backend source directly
+# Copy backend including node_modules
 COPY --from=backend-build /app/backend ./backend
 
-# Install only production dependencies for backend
-RUN npm install --production --prefix backend
+# Ensure only production dependencies remain
+RUN npm prune --production --prefix backend
 
 # Run backend server.js
 CMD ["node", "backend/server.js"]
