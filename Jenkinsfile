@@ -32,12 +32,19 @@ pipeline {
             }
         }
 
-        stage('Test SSH') {
+              stage('Deploy to VM') {
             steps {
                 sshagent(['vm-ssh-credentials-id']) {
-                    sh 'ssh -o StrictHostKeyChecking=no admin@172.31.44.50 "echo Connected OK"'
+                    sh '''
+                    ssh -o StrictHostKeyChecking=no admin@35.154.141.97 "
+                        docker stop secopstodo || true &&
+                        docker rm secopstodo || true &&
+                        docker run -d --name secopstodo -p 8080:8080 secopstodo:latest
+                    "
+                    '''
                 }
             }
         }
+
     }
 }
