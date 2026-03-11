@@ -31,5 +31,14 @@ pipeline {
                 }
             }
 
+
+                    stage('Deploy to VM') {
+                steps {
+                    sshagent(['vm-ssh-credentials-id']) {
+                        sh 'ssh -o StrictHostKeyChecking=no admin@172.31.44.50 "docker ps"'
+                    }
+                }
+            }
+
     }
 }
