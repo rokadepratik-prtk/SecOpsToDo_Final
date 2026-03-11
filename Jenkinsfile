@@ -32,19 +32,40 @@ pipeline {
             }
         }
 
-              stage('Deploy to VM') {
+        stage('Deploy to VM') {
             steps {
                 sshagent(['vm-ssh-credentials-id']) {
                     sh '''
                     ssh -o StrictHostKeyChecking=no admin@35.154.141.97 "
                         docker stop secopstodo || true &&
                         docker rm secopstodo || true &&
-                        docker run -d --name secopstodo -p 8080:8080 secopstodo:latest
+                        docker run -d --name secopstodo -p 8081:8080 secopstodo:latest
                     "
                     '''
                 }
             }
         }
 
+        stage('Health Check') {
+            steps {
+                script {
+                    def retries = 5
+                    def success = false
+                    for (int i = 0; i < retries; i++) {
+                        try {
+                            sh 'curl -s --fail http://35.154.141.97:8081 > /dev/null'
+                            success = true
+                            break
+                        } catch (Exception e) {
+                            echo "Health check failed, retrying in 10s..."
+                            sleep 10
+                        }
+                    }
+                    if (!success) {
+                        error("SecOpsToDo app did not respond on port 8081")
+                    }
+                }
+            }
+        }
     }
 }
