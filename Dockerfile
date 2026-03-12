@@ -17,16 +17,19 @@ COPY backend/ .
 FROM node:18-slim
 WORKDIR /app
 
+# Install curl for healthcheck
+RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
+
 # Copy frontend production build
 COPY --from=frontend-build /app/frontend/build ./frontend/build
 
 # Copy backend code
 COPY --from=backend-build /app/backend ./backend
 
-# Copy backend node_modules explicitly (fix for missing cors, express, etc.)
+# Copy backend node_modules explicitly
 COPY --from=backend-build /app/backend/node_modules ./backend/node_modules
 
-# Healthcheck on new /health endpoint
+# Healthcheck on /health endpoint
 HEALTHCHECK --interval=30s --timeout=5s --start-period=60s --retries=5 \
   CMD curl -f http://localhost:5000/health || exit 1
 
