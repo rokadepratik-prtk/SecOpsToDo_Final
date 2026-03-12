@@ -8,11 +8,12 @@ pipeline {
             }
         }
 
-     stage('Docker Build') {
-    steps {
-        sh "docker build -t secopstodo:latest -f SecOpsToDo_Final/Dockerfile SecOpsToDo_Final"
-    }
-}
+            stage('Docker Build') {
+                steps {
+                    sh "docker build -t secopstodo:latest -f Dockerfile ."
+                }
+            }
+
 
 
         stage('Security Scan') {
