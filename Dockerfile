@@ -30,8 +30,8 @@ COPY --from=backend-build /app/backend ./backend
 COPY --from=backend-build /app/backend/node_modules ./backend/node_modules
 
 # Healthcheck on /health endpoint
-HEALTHCHECK --interval=30s --timeout=5s --start-period=60s --retries=5 \
-  CMD curl -f http://localhost:5000/health || exit 1
+HEALTHCHECK CMD node -e "require('http').get('http://localhost:5000/health', res => process.exit(res.statusCode === 200 ? 0 : 1))"
+
 
 # Run backend server
 CMD ["node", "backend/server.js"]
