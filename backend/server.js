@@ -15,6 +15,10 @@ let todos = [];
 // Get all todos
 app.get("/api/todos", (req, res) => res.json(todos));
 
+app.get("/health", (req, res) => {
+  res.status(200).json({ status: "ok" });
+});
+
 // Add new todo
 app.post("/api/todos", (req, res) => {
   const todo = { id: Date.now(), text: req.body.text };
