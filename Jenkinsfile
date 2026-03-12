@@ -8,8 +8,9 @@ pipeline {
             }
         }
 
-               stage('Docker Build') {
+        stage('Docker Build') {
             steps {
+                // Build from repo root
                 sh "docker build -t secopstodo:latest -f Dockerfile ."
             }
         }
