@@ -23,9 +23,9 @@ COPY --from=frontend-build /app/frontend/build ./frontend/build
 # Copy backend including node_modules
 COPY --from=backend-build /app/backend ./backend
 
-# Healthcheck on backend port 5000
-HEALTHCHECK --interval=30s --timeout=5s --start-period=60s --retries=3 \
-  CMD curl -f http://localhost:5000/api/todos || exit 1
+# Healthcheck on new /health endpoint
+HEALTHCHECK --interval=30s --timeout=5s --start-period=60s --retries=5 \
+  CMD curl -f http://localhost:5000/health || exit 1
 
 # Run backend server
 CMD ["node", "backend/server.js"]
