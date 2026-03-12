@@ -2,9 +2,16 @@ pipeline {
     agent any
 
     stages {
+        stage('Cleanup') {
+            steps {
+                sh 'docker rm -f secopstodo || true'
+            }
+        }
+
         stage('Docker Build') {
             steps {
-                sh "docker build -t secopstodo:latest ."
+                // Build from repo root where Dockerfile + backend + frontend exist
+                sh "docker build -t secopstodo:latest -f SecOpsToDo_Final/Dockerfile SecOpsToDo_Final"
             }
         }
 
@@ -37,8 +44,7 @@ pipeline {
                 sshagent(['vm-ssh-credentials-id']) {
                     sh '''
                     ssh -o StrictHostKeyChecking=no admin@35.154.141.97 "
-                        docker stop secopstodo || true &&
-                        docker rm secopstodo || true &&
+                        docker rm -f secopstodo || true &&
                         docker run -d --name secopstodo -p 8081:8080 secopstodo:latest
                     "
                     '''
@@ -49,7 +55,7 @@ pipeline {
         stage('Health Check') {
             steps {
                 script {
-                    def retries = 5
+                    def retries = 10
                     def success = false
                     for (int i = 0; i < retries; i++) {
                         try {
@@ -57,8 +63,8 @@ pipeline {
                             success = true
                             break
                         } catch (Exception e) {
-                            echo "Health check failed, retrying in 10s..."
-                            sleep 10
+                            echo "Health check failed, retrying in 15s..."
+                            sleep 15
                         }
                     }
                     if (!success) {
