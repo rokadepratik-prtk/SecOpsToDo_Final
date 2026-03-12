@@ -20,10 +20,13 @@ WORKDIR /app
 # Copy frontend production build
 COPY --from=frontend-build /app/frontend/build ./frontend/build
 
-# Copy backend including node_modules
+# Copy backend code
 COPY --from=backend-build /app/backend ./backend
 
-# Healthcheck on new /health endpoint
+# Copy backend node_modules explicitly
+COPY --from=backend-build /app/backend/node_modules ./backend/node_modules
+
+# Healthcheck on /health endpoint
 HEALTHCHECK --interval=30s --timeout=5s --start-period=60s --retries=5 \
   CMD curl -f http://localhost:5000/health || exit 1
 
