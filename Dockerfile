@@ -27,6 +27,5 @@ COPY --from=backend-build /app/backend ./backend
 HEALTHCHECK --interval=30s --timeout=5s --start-period=60s --retries=3 \
   CMD curl -f http://localhost:5000/api/todos || exit 1
 
-
 # Run backend server
 CMD ["node", "backend/server.js"]
