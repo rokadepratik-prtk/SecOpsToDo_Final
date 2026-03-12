@@ -23,10 +23,10 @@ COPY --from=frontend-build /app/frontend/build ./frontend/build
 # Copy backend code
 COPY --from=backend-build /app/backend ./backend
 
-# Copy backend node_modules explicitly
+# Copy backend node_modules explicitly (fix for missing cors, express, etc.)
 COPY --from=backend-build /app/backend/node_modules ./backend/node_modules
 
-# Healthcheck on /health endpoint
+# Healthcheck on new /health endpoint
 HEALTHCHECK --interval=30s --timeout=5s --start-period=60s --retries=5 \
   CMD curl -f http://localhost:5000/health || exit 1
 
