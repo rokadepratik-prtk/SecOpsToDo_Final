@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-const API = "http://192.168.56.115:5000/api/todos";
+const API = "/api/todos";  // relative path
 
 export default function App() {
   const [todos, setTodos] = useState([]);
@@ -31,7 +31,6 @@ export default function App() {
     <div className="bg">
       <div className="glass">
         <h1>Glass Todo</h1>
-
         <div className="input-row">
           <input
             placeholder="What’s your focus today?"
@@ -40,7 +39,6 @@ export default function App() {
           />
           <button onClick={addTodo}>Add</button>
         </div>
-
         <ul>
           {todos.map(todo => (
             <li key={todo.id}>
