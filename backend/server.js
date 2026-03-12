@@ -42,6 +42,7 @@ app.get("*", (_, res) =>
 
 /* Start Server */
 
-app.listen(PORT, () =>
-  console.log(`Backend running on http://192.168.56.115:${PORT}`)
+app.listen(PORT, "0.0.0.0", () =>
+  console.log(`Backend running on http://0.0.0.0:${PORT}`)
 );
+
