@@ -55,15 +55,12 @@ pipeline {
             }
         }
 
-        stage('Health Check') {
-            steps {
-                script {
-                    def status = sh(script: "ssh -o StrictHostKeyChecking=no admin@35.154.141.97 'docker inspect --format={{.State.Health.Status}} secopstodo'", returnStdout: true).trim()
-                    if (status != "healthy") {
-                        error("SecOpsToDo container is not healthy: ${status}")
-                    }
-                }
-            }
+       stage('Smoke Test') {
+    steps {
+        sh "ssh -o StrictHostKeyChecking=no admin@35.154.141.97 'curl -f http://localhost:8081/health || exit 1'"
+    }
+}
+
         }
     }
 }
