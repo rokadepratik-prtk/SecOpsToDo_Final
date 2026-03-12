@@ -8,11 +8,14 @@ pipeline {
             }
         }
 
-            stage('Docker Build') {
-                steps {
-                    sh "docker build -t secopstodo:latest -f Dockerfile ."
-                }
-            }
+         stage('Docker Build') {
+    steps {
+        dir("${WORKSPACE}") {
+            sh "docker build -t secopstodo:latest -f Dockerfile ."
+        }
+    }
+}
+
 
 
 
