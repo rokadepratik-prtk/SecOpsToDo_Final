@@ -55,12 +55,12 @@ pipeline {
             }
         }
 
-       stage('Smoke Test') {
-    steps {
-        sh "ssh -o StrictHostKeyChecking=no admin@35.154.141.97 'curl -f http://localhost:8081/health || exit 1'"
-    }
-}
+                   stage('Smoke Test') {
+                steps {
+                    sh "ssh -o StrictHostKeyChecking=no admin@35.154.141.97 'curl -f http://localhost:8081/health || exit 1'"
+                }
+            }
 
-        }
+        
     }
 }
