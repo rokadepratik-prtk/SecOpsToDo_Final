@@ -5,20 +5,16 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-      target: backend-build
     container_name: backend
     ports:
       - "5000:5000"
     environment:
       - NODE_ENV=production
-    depends_on:
-      - frontend
 
   frontend:
     build:
-      context: .
-      dockerfile: Dockerfile
-      target: frontend-build
+      context: ./frontend
+      dockerfile: Dockerfile.frontend   # optional separate Dockerfile for frontend
     container_name: frontend
     ports:
       - "3000:3000"
