@@ -8,21 +8,20 @@ pipeline {
             }
         }
 
-     stage('SonarQube Analysis') {
+    stage('SonarQube Analysis') {
     steps {
-        nodejs(nodeJSInstallationName: 'NodeJS_18') {
-            withSonarQubeEnv('SonarQubeServer') {
-                sh '''
-                sonar-scanner \
-                  -Dsonar.projectKey=SecOpsToDo \
-                  -Dsonar.sources=. \
-                  -Dsonar.host.url=http://35.154.141.97:9000 \
-                  -Dsonar.login=$SONARQUBE_TOKEN
-                '''
-            }
+        withSonarQubeEnv('SonarQubeServer') {
+            sh '''
+            /opt/sonar-scanner/bin/sonar-scanner \
+              -Dsonar.projectKey=SecOpsToDo \
+              -Dsonar.sources=. \
+              -Dsonar.host.url=http://35.154.141.97:9000 \
+              -Dsonar.login=$SONARQUBE_TOKEN
+            '''
         }
     }
 }
+
 
 
         stage('Quality Gate') {
