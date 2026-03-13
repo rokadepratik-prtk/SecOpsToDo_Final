@@ -8,22 +8,22 @@ pipeline {
             }
         }
 
-        stage('SonarQube Analysis') {
-            steps {
-                withSonarQubeEnv('SonarQubeServer') {
-                    script {
-                        def scannerHome = tool 'SonarQubeScanner'
-                        sh """
-                            ${scannerHome}/bin/sonar-scanner \
-                              -Dsonar.projectKey=SecOpsToDo \
-                              -Dsonar.sources=. \
-                              -Dsonar.host.url=$SONAR_HOST_URL \
-                              -Dsonar.login=$SONAR_AUTH_TOKEN
-                        """
-                    }
-                }
+     stage('SonarQube Analysis') {
+    steps {
+        nodejs(nodeJSInstallationName: 'NodeJS_18') {
+            withSonarQubeEnv('SonarQubeServer') {
+                sh '''
+                sonar-scanner \
+                  -Dsonar.projectKey=SecOpsToDo \
+                  -Dsonar.sources=. \
+                  -Dsonar.host.url=http://35.154.141.97:9000 \
+                  -Dsonar.login=$SONARQUBE_TOKEN
+                '''
             }
         }
+    }
+}
+
 
         stage('Quality Gate') {
             steps {
