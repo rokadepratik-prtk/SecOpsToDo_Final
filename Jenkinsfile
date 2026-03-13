@@ -8,15 +8,26 @@ pipeline {
             }
         }
 
-            stage('Docker Build') {
-                steps {
-                    sh "docker build --no-cache -t secopstodo:latest -f ${WORKSPACE}/Dockerfile ${WORKSPACE}"
+        stage('SonarQube Analysis') {
+            steps {
+                withSonarQubeEnv('SonarQubeServer') {
+                    sh '''
+                        echo "Running SonarQube scan..."
+                        sonar-scanner \
+                          -Dsonar.projectKey=SecOpsToDo \
+                          -Dsonar.sources=. \
+                          -Dsonar.host.url=$SONAR_HOST_URL \
+                          -Dsonar.login=$SONAR_AUTH_TOKEN
+                    '''
                 }
             }
+        }
 
-
-
-
+        stage('Docker Build') {
+            steps {
+                sh "docker build --no-cache -t secopstodo:latest -f ${WORKSPACE}/Dockerfile ${WORKSPACE}"
+            }
+        }
 
         stage('Security Scan') {
             steps {
@@ -55,12 +66,10 @@ pipeline {
             }
         }
 
-                   stage('Smoke Test') {
-                steps {
-                    sh "ssh -o StrictHostKeyChecking=no admin@35.154.141.97 'curl -f http://localhost:8081/health || exit 1'"
-                }
+        stage('Smoke Test') {
+            steps {
+                sh "ssh -o StrictHostKeyChecking=no admin@35.154.141.97 'curl -f http://localhost:8081/health || exit 1'"
             }
-
-        
+        }
     }
 }
