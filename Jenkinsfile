@@ -8,24 +8,19 @@ pipeline {
             }
         }
 
-           stage('SonarQube Analysis') {
-            steps {
-                withSonarQubeEnv('SonarQubeServer') {
-                    sh """
-                    /opt/sonar-scanner/bin/sonar-scanner \
-                      -Dsonar.projectKey=SecOpsToDo \
-                      -Dsonar.sources=. \
-                      -Dsonar.host.url=$SONAR_HOST_URL \
-                      -Dsonar.login=$SONAR_AUTH_TOKEN
-                    """
+            stage('SonarQube Analysis') {
+                steps {
+                    withSonarQubeEnv('SonarQubeServer') {
+                        sh """
+                        /opt/sonar-scanner/bin/sonar-scanner \
+                          -Dsonar.projectKey=SecOpsToDo \
+                          -Dsonar.sources=. \
+                          -Dsonar.host.url=$SONAR_HOST_URL \
+                          -Dsonar.login=$SONAR_AUTH_TOKEN
+                        """
+                    }
                 }
             }
-        }
-
-
-                
-
-
 
         stage('Quality Gate') {
             steps {
