@@ -27,8 +27,7 @@ pipeline {
 
         stage('Quality Gate') {
             steps {
-                timeout(time: 30, unit: 'MINUTES') {
-                    // This waits for SonarQube to compute the Quality Gate result
+                timeout(time: 5, unit: 'MINUTES') {
                     waitForQualityGate abortPipeline: true
                 }
             }
@@ -40,7 +39,7 @@ pipeline {
             }
         }
 
-        stage('Security Scan') {
+        stage('Security Scan - Trivy') {
             steps {
                 sh '''
                 echo "Running Trivy scan..."
@@ -80,6 +79,27 @@ pipeline {
         stage('Smoke Test') {
             steps {
                 sh "ssh -o StrictHostKeyChecking=no admin@35.154.141.97 'curl -f http://localhost:8081/health || exit 1'"
+            }
+        }
+
+        stage('OWASP ZAP Scan') {
+            steps {
+                sh '''
+                echo "Running OWASP ZAP baseline scan..."
+                docker run --rm -v $(pwd):/zap/wrk/:rw \
+                  owasp/zap2docker-stable zap-baseline.py \
+                  -t http://35.154.141.97:8081 \
+                  -r zap_report.html
+                '''
+                archiveArtifacts artifacts: 'zap_report.html', fingerprint: true
+                publishHTML([
+                    reportDir: '.',
+                    reportFiles: 'zap_report.html',
+                    reportName: 'OWASP ZAP Report',
+                    keepAll: true,
+                    alwaysLinkToLastBuild: true,
+                    allowMissing: false
+                ])
             }
         }
     }
