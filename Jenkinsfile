@@ -8,7 +8,7 @@ pipeline {
             }
         }
 
-            stage('SonarQube Analysis') {
+             stage('SonarQube Analysis') {
                 steps {
                     withSonarQubeEnv('SonarQubeServer') {
                         sh """
@@ -21,6 +21,17 @@ pipeline {
                     }
                 }
             }
+
+
+        stage('Debug SonarQube Env') {
+    steps {
+        withSonarQubeEnv('SonarQubeServer') {
+            sh 'echo "SONAR_HOST_URL=$SONAR_HOST_URL"'
+            sh 'echo "SONAR_AUTH_TOKEN length: ${#SONAR_AUTH_TOKEN}"'
+        }
+    }
+}
+
 
         stage('Quality Gate') {
             steps {
