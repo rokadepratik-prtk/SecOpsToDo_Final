@@ -82,29 +82,30 @@ pipeline {
             }
         }
 
-                stage('OWASP ZAP Scan') {
-                    steps {
-                        withCredentials([usernamePassword(credentialsId: 'ghcr-credentials', usernameVariable: 'GH_USER', passwordVariable: 'GH_TOKEN')]) {
-                            sh '''
-                            echo $GH_TOKEN | docker login ghcr.io -u $GH_USER --password-stdin
-                            docker run --rm -v $(pwd):/zap/wrk/:rw \
-                              ghcr.io/zaproxy/zap2docker-stable:0.1.0 zap-baseline.py \
-                              -t http://35.154.141.97:8081 \
-                              -r zap_report.html \
-                              --exit-code 1
-                            '''
-                        }
-                        archiveArtifacts artifacts: 'zap_report.html', fingerprint: true
-                        publishHTML([
-                            reportDir: '.',
-                            reportFiles: 'zap_report.html',
-                            reportName: 'OWASP ZAP Report',
-                            keepAll: true,
-                            alwaysLinkToLastBuild: true,
-                            allowMissing: false
-                        ])
-                    }
+        stage('OWASP ZAP Scan') {
+            steps {
+                withCredentials([usernamePassword(credentialsId: 'ghcr-credentials', usernameVariable: 'GH_USER', passwordVariable: 'GH_TOKEN')]) {
+                    sh '''
+                    echo $GH_TOKEN | docker login ghcr.io -u $GH_USER --password-stdin
+                    docker run --rm -v $(pwd):/zap/wrk/:rw \
+                      ghcr.io/zaproxy/zaproxy:stable zap-baseline.py \
+                      -t http://35.154.141.97:8081 \
+                      -r zap_report.html \
+                      --exit-code 1
+                    '''
                 }
+                archiveArtifacts artifacts: 'zap_report.html', fingerprint: true
+                publishHTML([
+                    reportDir: '.',
+                    reportFiles: 'zap_report.html',
+                    reportName: 'OWASP ZAP Report',
+                    keepAll: true,
+                    alwaysLinkToLastBuild: true,
+                    allowMissing: false
+                ])
+            }
+        }
+
 
 
 
