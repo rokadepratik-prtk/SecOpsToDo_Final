@@ -8,18 +8,20 @@ pipeline {
             }
         }
 
-                        stage('SonarQube Analysis') {
+           stage('SonarQube Analysis') {
             steps {
                 withSonarQubeEnv('SonarQubeServer') {
-                    sh '''
+                    sh """
                     /opt/sonar-scanner/bin/sonar-scanner \
                       -Dsonar.projectKey=SecOpsToDo \
                       -Dsonar.sources=. \
-                      -Dsonar.host.url=http://35.154.141.97:9000
-                    '''
+                      -Dsonar.host.url=$SONAR_HOST_URL \
+                      -Dsonar.login=$SONAR_AUTH_TOKEN
+                    """
                 }
             }
         }
+
 
                 
 
