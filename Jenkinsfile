@@ -76,22 +76,45 @@ pipeline {
             }
         }
 
-      stage('Smoke Test') {
-    steps {
-        sshagent(['vm-ssh-credentials-id']) {
-            sh '''
-                ssh -o StrictHostKeyChecking=no admin@35.154.141.97 "
-                    for i in {1..5}; do
-                        curl -s -o /dev/null -w '%{http_code}' http://localhost:8081/ | grep 200 && exit 0
-                        echo 'Waiting for app...'
-                        sleep 5
-                    done
-                    exit 1
-                "
-            '''
+        stage('Smoke Test - WAF Proxy') {
+            steps {
+                sshagent(['vm-ssh-credentials-id']) {
+                    sh '''
+                        ssh -o StrictHostKeyChecking=no admin@35.154.141.97 "
+                            for i in {1..5}; do
+                                curl -s -o /dev/null -w '%{http_code}' http://localhost:8082/ | grep 200 && exit 0
+                                echo 'Waiting for WAF-protected app...'
+                                sleep 5
+                            done
+                            exit 1
+                        "
+                    '''
+                }
+            }
         }
-    }
-}
 
+        stage('OWASP ZAP DAST') {
+            steps {
+                sshagent(['vm-ssh-credentials-id']) {
+                    sh '''
+                        ssh -o StrictHostKeyChecking=no admin@35.154.141.97 "
+                            docker run --rm --network host \
+                              -v /home/admin:/zap/wrk/:rw \
+                              owasp/zap2docker-stable zap-baseline.py \
+                              -t http://localhost:8082 \
+                              -r /zap/wrk/zap-report.html
+                        "
+                    '''
+                }
+                publishHTML([
+                    reportDir: '/home/admin',
+                    reportFiles: 'zap-report.html',
+                    reportName: 'OWASP ZAP Security Report',
+                    keepAll: true,
+                    alwaysLinkToLastBuild: true,
+                    allowMissing: false
+                ])
+            }
+        }
     }
 }
