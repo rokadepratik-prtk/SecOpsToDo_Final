@@ -1,5 +1,11 @@
 pipeline {
-    agent any
+    agent { label 'docker' }
+
+    environment {
+        SONAR_HOST_URL = 'http://35.154.141.97:9000'
+        SONAR_PROJECT_KEY = 'SecOpsToDo'
+        SONAR_AUTH_TOKEN = credentials('sonarqube-token')   // Jenkins credential for SonarQube token
+    }
 
     stages {
         stage('Cleanup') {
@@ -12,11 +18,11 @@ pipeline {
             steps {
                 withSonarQubeEnv('SonarQubeServer') {
                     sh """
-                    /opt/sonar-scanner/bin/sonar-scanner \
-                      -Dsonar.projectKey=SecOpsToDo \
-                      -Dsonar.sources=. \
-                      -Dsonar.host.url=$SONAR_HOST_URL \
-                      -Dsonar.login=$SONAR_AUTH_TOKEN
+                        /opt/sonar-scanner/bin/sonar-scanner \
+                          -Dsonar.projectKey=${SONAR_PROJECT_KEY} \
+                          -Dsonar.sources=. \
+                          -Dsonar.host.url=${SONAR_HOST_URL} \
+                          -Dsonar.login=${SONAR_AUTH_TOKEN}
                     """
                 }
             }
@@ -39,11 +45,11 @@ pipeline {
         stage('Security Scan - Trivy') {
             steps {
                 sh '''
-                echo "Running Trivy scan..."
-                trivy clean --scan-cache || true
-                trivy image --cache-dir /tmp/trivy-${BUILD_ID} \
-                  --severity HIGH,CRITICAL \
-                  --format json -o trivy-report.json secopstodo:latest
+                    echo "Running Trivy scan..."
+                    trivy clean --scan-cache || true
+                    trivy image --cache-dir /tmp/trivy-${BUILD_ID} \
+                      --severity HIGH,CRITICAL \
+                      --format json -o trivy-report.json secopstodo:latest
                 '''
                 archiveArtifacts artifacts: 'trivy-report.json', fingerprint: true
             }
@@ -67,10 +73,10 @@ pipeline {
             steps {
                 sshagent(['vm-ssh-credentials-id']) {
                     sh '''
-                    ssh -o StrictHostKeyChecking=no admin@35.154.141.97 "
-                        docker rm -f secopstodo || true &&
-                        docker run -d --name secopstodo -p 8081:5000 secopstodo:latest
-                    "
+                        ssh -o StrictHostKeyChecking=no admin@35.154.141.97 "
+                            docker rm -f secopstodo || true &&
+                            docker run -d --name secopstodo -p 8081:5000 secopstodo:latest
+                        "
                     '''
                 }
             }
@@ -85,6 +91,12 @@ pipeline {
                     '''
                 }
             }
+        }
+    }
+
+    post {
+        always {
+            archiveArtifacts artifacts: '**/*.json, **/*.html', fingerprint: true
         }
     }
 }
