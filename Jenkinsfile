@@ -76,15 +76,22 @@ pipeline {
             }
         }
 
-        stage('Smoke Test') {
-            steps {
-                sshagent(['vm-ssh-credentials-id']) {
-                    sh '''
-                        ssh -o StrictHostKeyChecking=no admin@35.154.141.97 \
-                        "curl -f http://localhost:8081/ || exit 1"
-                    '''
-                }
-            }
+      stage('Smoke Test') {
+    steps {
+        sshagent(['vm-ssh-credentials-id']) {
+            sh '''
+                ssh -o StrictHostKeyChecking=no admin@35.154.141.97 "
+                    for i in {1..5}; do
+                        curl -s -o /dev/null -w '%{http_code}' http://localhost:8081/ | grep 200 && exit 0
+                        echo 'Waiting for app...'
+                        sleep 5
+                    done
+                    exit 1
+                "
+            '''
         }
+    }
+}
+
     }
 }
