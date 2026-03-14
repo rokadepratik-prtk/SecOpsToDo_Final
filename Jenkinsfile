@@ -36,18 +36,20 @@ pipeline {
             }
         }
 
-        stage('Security Scan - Trivy') {
-            steps {
-                sh '''
-                echo "Running Trivy scan..."
-                trivy clean --scan-cache || true
-                trivy image --cache-dir /tmp/trivy-${BUILD_ID} \
-                  --severity HIGH,CRITICAL \
-                  --format json -o trivy-report.json secopstodo:latest
-                '''
-                archiveArtifacts artifacts: 'trivy-report.json', fingerprint: true
-            }
-        }
+stage('Security Scan - Trivy') {
+    steps {
+        sh '''
+        echo "Running Trivy scan..."
+        mkdir -p /var/lib/trivy-cache
+        trivy clean --cache-dir /var/lib/trivy-cache || true
+        trivy image --cache-dir /var/lib/trivy-cache \
+          --severity HIGH,CRITICAL \
+          --format json -o trivy-report.json secopstodo:latest
+        '''
+        archiveArtifacts artifacts: 'trivy-report.json', fingerprint: true
+    }
+}
+
 
         stage('Convert Trivy Report') {
             steps {
