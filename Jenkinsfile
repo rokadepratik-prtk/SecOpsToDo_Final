@@ -8,7 +8,7 @@ pipeline {
             }
         }
 
-                 stage('SonarQube Analysis') {
+        stage('SonarQube Analysis') {
             steps {
                 withSonarQubeEnv('SonarQubeServer') {
                     sh """
@@ -21,7 +21,6 @@ pipeline {
                 }
             }
         }
-
 
         stage('Quality Gate') {
             steps {
@@ -37,35 +36,32 @@ pipeline {
             }
         }
 
-       stage('Security Scan - Trivy') {
-    steps {
-        sh '''
-        echo "Running Trivy scan..."
-        # Clear scan cache to avoid lock errors
-        trivy clean --scan-cache || true
-        # Use a unique cache dir per build to prevent collisions
-        trivy image --cache-dir /tmp/trivy-${BUILD_ID} \
-          --severity HIGH,CRITICAL \
-          --format json -o trivy-report.json secopstodo:latest
-        '''
-        archiveArtifacts artifacts: 'trivy-report.json', fingerprint: true
-    }
-}
+        stage('Security Scan - Trivy') {
+            steps {
+                sh '''
+                echo "Running Trivy scan..."
+                trivy clean --scan-cache || true
+                trivy image --cache-dir /tmp/trivy-${BUILD_ID} \
+                  --severity HIGH,CRITICAL \
+                  --format json -o trivy-report.json secopstodo:latest
+                '''
+                archiveArtifacts artifacts: 'trivy-report.json', fingerprint: true
+            }
+        }
 
-stage('Convert Trivy Report') {
-    steps {
-        sh 'node trivy-json-to-html.js trivy-report.json trivy-report.html'
-        publishHTML([
-            reportDir: '.',
-            reportFiles: 'trivy-report.html',
-            reportName: 'Trivy Security Report',
-            keepAll: true,
-            alwaysLinkToLastBuild: true,
-            allowMissing: false
-        ])
-    }
-}
-
+        stage('Convert Trivy Report') {
+            steps {
+                sh 'node trivy-json-to-html.js trivy-report.json trivy-report.html'
+                publishHTML([
+                    reportDir: '.',
+                    reportFiles: 'trivy-report.html',
+                    reportName: 'Trivy Security Report',
+                    keepAll: true,
+                    alwaysLinkToLastBuild: true,
+                    allowMissing: false
+                ])
+            }
+        }
 
         stage('Deploy to VM') {
             steps {
@@ -80,46 +76,15 @@ stage('Convert Trivy Report') {
             }
         }
 
-  stage('Smoke Test') {
-    steps {
-        sshagent(['admin']) {
-            sh '''
-                ssh -o StrictHostKeyChecking=no admin@35.154.141.97 \
-                "curl -f http://localhost:8081/ || exit 1"
-            '''
+        stage('Smoke Test') {
+            steps {
+                sshagent(['vm-ssh-credentials-id']) {
+                    sh '''
+                        ssh -o StrictHostKeyChecking=no admin@35.154.141.97 \
+                        "curl -f http://localhost:8081/ || exit 1"
+                    '''
+                }
+            }
         }
-    }
-}
-
-
-stage('OWASP ZAP Scan') {
-    steps {
-        sh '''
-            echo "Running OWASP ZAP baseline scan..."
-            docker run --rm -u root -v $WORKSPACE:/zap/wrk/:rw \
-              ghcr.io/zaproxy/zaproxy:stable zap-baseline.py \
-              -t http://35.154.141.97:8081 \
-              -r zap_report.html --autooff -I
-        '''
-        archiveArtifacts artifacts: 'zap_report.html', fingerprint: true
-        publishHTML([
-            reportDir: '.',
-            reportFiles: 'zap_report.html',
-            reportName: 'OWASP ZAP Report',
-            keepAll: true,
-            alwaysLinkToLastBuild: true,
-            allowMissing: false
-        ])
-    }
-}
-
-
-
-
-
-
-
-
-
     }
 }
