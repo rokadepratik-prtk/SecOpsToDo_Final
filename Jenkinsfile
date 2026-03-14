@@ -93,31 +93,32 @@ pipeline {
             }
         }
 
-        stage('OWASP ZAP DAST') {
-            steps {
-                sshagent(['vm-ssh-credentials-id']) {
-                    sh '''
-                        ssh -o StrictHostKeyChecking=no admin@35.154.141.97 "
-                            docker pull owasp/zap2docker-stable &&
-                            docker run --rm --network host \
-                              -v /home/admin:/zap/wrk/:rw \
-                              owasp/zap2docker-stable \
-                              zap-baseline.py -t http://localhost:8082 \
-                              -r /zap/wrk/zap-report.html
-                        "
-                        scp -o StrictHostKeyChecking=no admin@35.154.141.97:/home/admin/zap-report.html .
-                    '''
-                }
-                publishHTML([
-                    reportDir: '.',
-                    reportFiles: 'zap-report.html',
-                    reportName: 'OWASP ZAP Security Report',
-                    keepAll: true,
-                    alwaysLinkToLastBuild: true,
-                    allowMissing: false
-                ])
-                archiveArtifacts artifacts: 'zap-report.html', fingerprint: true
-            }
+stage('OWASP ZAP DAST') {
+    steps {
+        sshagent(['vm-ssh-credentials-id']) {
+            sh '''
+                ssh -o StrictHostKeyChecking=no admin@35.154.141.97 "
+                    docker pull owasp/zap2docker-stable:2.14.0 &&
+                    docker run --rm --network host \
+                      -v /home/admin:/zap/wrk/:rw \
+                      owasp/zap2docker-stable:2.14.0 \
+                      zap-baseline.py -t http://localhost:8082 \
+                      -r /zap/wrk/zap-report.html
+                "
+                scp -o StrictHostKeyChecking=no admin@35.154.141.97:/home/admin/zap-report.html .
+            '''
         }
+        publishHTML([
+            reportDir: '.',
+            reportFiles: 'zap-report.html',
+            reportName: 'OWASP ZAP Security Report',
+            keepAll: true,
+            alwaysLinkToLastBuild: true,
+            allowMissing: false
+        ])
+        archiveArtifacts artifacts: 'zap-report.html', fingerprint: true
+    }
+}
+
     }
 }
