@@ -95,11 +95,11 @@ stage('Convert Trivy Report') {
 stage('OWASP ZAP Scan') {
     steps {
         sh '''
-        echo "Running OWASP ZAP baseline scan..."
-        docker run --rm -u root -v $WORKSPACE:/zap/wrk/:rw \
-          ghcr.io/zaproxy/zaproxy:stable zap-baseline.py \
-          -t http://35.154.141.97:8081 \
-          -r zap_report.html --autooff -I
+            echo "Running OWASP ZAP baseline scan..."
+            docker run --rm -u root -v $WORKSPACE:/zap/wrk/:rw \
+              ghcr.io/zaproxy/zaproxy:stable zap-baseline.py \
+              -t http://35.154.141.97:8081 \
+              -r zap_report.html --autooff -I
         '''
         archiveArtifacts artifacts: 'zap_report.html', fingerprint: true
         publishHTML([
@@ -112,6 +112,7 @@ stage('OWASP ZAP Scan') {
         ])
     }
 }
+
 
 
 
