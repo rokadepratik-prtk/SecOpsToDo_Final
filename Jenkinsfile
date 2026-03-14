@@ -100,8 +100,8 @@ pipeline {
                         ssh -o StrictHostKeyChecking=no admin@35.154.141.97 "
                             docker run --rm --network host \
                               -v /home/admin:/zap/wrk/:rw \
-                              owasp/zap2docker-stable zap-baseline.py \
-                              -t http://localhost:8082 \
+                              owasp/zap2docker-stable \
+                              zap-baseline.py -t http://localhost:8082 \
                               -r /zap/wrk/zap-report.html
                         "
                     '''
